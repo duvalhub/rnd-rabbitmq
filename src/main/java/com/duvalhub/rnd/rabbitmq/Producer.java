@@ -20,15 +20,15 @@ public class Producer implements ApplicationRunner {
   @Override
   public void run(ApplicationArguments args) throws Exception {
     Executors.newSingleThreadScheduledExecutor()
-        .scheduleAtFixedRate(sender(), 0, 15, TimeUnit.SECONDS);
+        .scheduleAtFixedRate(sender(), 0, 10, TimeUnit.SECONDS);
 
     Executors.newSingleThreadScheduledExecutor()
-        .scheduleAtFixedRate(sendToReplyReceiver(), 5, 15, TimeUnit.SECONDS);
+        .scheduleAtFixedRate(sendToReplyReceiver(), 5, 10, TimeUnit.SECONDS);
   }
 
   private Runnable sender() {
     return () -> {
-      log.info("Send message...");
+      System.out.println("Sending message to Receiver...");
       rabbitTemplate.convertAndSend(AmqpConfiguration.topicExchangeName, AmqpConfiguration.routingKey, "Hello from RabbitMQ!", message -> {
         message.getMessageProperties().setReplyToAddress(new Address(AmqpConfiguration.topicExchangeName, AmqpConfiguration.replyQueueName));
         return message;
@@ -38,9 +38,9 @@ public class Producer implements ApplicationRunner {
 
   private Runnable sendToReplyReceiver() {
     return () -> {
-      log.info("Sending to ReplyReceiver");
+      System.out.println("Sending to ReplyReceiver");
       Object response = rabbitTemplate.convertSendAndReceive(AmqpConfiguration.topicExchangeName, AmqpConfiguration.replyQueueName, "Hello ReplyConsumer");
-      log.info("ReplyReceiver replied {}", response);
+      System.out.printf("ReplyReceiver replied %s%n", response);
     };
   }
 }

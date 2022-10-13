@@ -18,16 +18,12 @@ public class AmqpConfiguration {
 
   static final String queueName = "spring-boot";
   static final String replyQueueName = "replies";
+  static final Queue replyQueue = new Queue(replyQueueName);
   static final String routingKey = "foo.bar.#";
 
   @Bean
   Queue queue() {
     return new Queue(queueName, false);
-  }
-
-  @Bean
-  Queue replyQueue() {
-    return new Queue(replyQueueName, true);
   }
 
   @Bean
@@ -41,12 +37,6 @@ public class AmqpConfiguration {
   }
 
   @Bean
-  Binding replyBinding(TopicExchange exchange) {
-    Queue queue = replyQueue();
-    return BindingBuilder.bind(queue).to(exchange).with(replyQueueName);
-  }
-
-  @Bean
   SimpleMessageListenerContainer container(ConnectionFactory connectionFactory,
                                            MessageListenerAdapter listenerAdapter) {
     SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
@@ -55,16 +45,6 @@ public class AmqpConfiguration {
     container.setMessageListener(listenerAdapter);
     return container;
   }
-
-//  @Bean
-//  SimpleMessageListenerContainer replyListenerContainer(ConnectionFactory connectionFactory
-//      , ReplyReceiver replyReceiver) {
-//    SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
-//    container.setConnectionFactory(connectionFactory);
-//    container.setQueueNames(replyQueueName);
-//    container.setMessageListener(new MessageListenerAdapter(replyReceiver, "handleReply"));
-//    return container;
-//  }
 
   @Bean
   MessageListenerAdapter listenerAdapter(Receiver receiver) {
